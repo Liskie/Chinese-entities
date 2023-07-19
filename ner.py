@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def ner_from_files(input_path):
     # Create a NER processor for Chinese
-    nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=False)
+    nlp = stanza.Pipeline(lang='zh', processors='tokenize,mwt,ner', use_gpu=True)
 
     # Dictionary to store named entities and their counts
     entities_dict = {}
