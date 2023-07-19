@@ -4,9 +4,8 @@ import stanza
 from stanza import DownloadMethod
 from tqdm import tqdm
 
-
 def ner_from_files(input_path):
-    # Create a NER processor for Chinese
+    # Create a NER processor for Chinese with GPU enabled
     nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
                           download_method=DownloadMethod.REUSE_RESOURCES)
 
@@ -14,11 +13,8 @@ def ner_from_files(input_path):
     entities_dict = {}
 
     for root, _, files in tqdm(os.walk(input_path), total=len(os.listdir(input_path)), desc='Total: '):
-        tqdm.write(f'root {root} {files}')
         for file in tqdm(files, desc='Subdir: '):
-
             file_path = os.path.join(root, file)
-            tqdm.write(f'subdir {file} {file_path}')
 
             with open(file_path, 'r', encoding='utf-8') as infile:
                 text = infile.read()
@@ -37,6 +33,10 @@ def ner_from_files(input_path):
                         entities_dict[entity_label] += 1
                     else:
                         entities_dict[entity_label] = 1
+
+            # Release GPU resources for each document
+            doc.sentences[0].conll_file.clear()
+            nlp.processors['ner'].clear_annotations()
 
     return dict(sorted(entities_dict.items(), key=lambda item: item[1], reverse=True))
 
