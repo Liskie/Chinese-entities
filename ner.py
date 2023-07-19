@@ -1,12 +1,14 @@
 import json
 import os
 import stanza
+from stanza import DownloadMethod
 from tqdm import tqdm
 
 
 def ner_from_files(input_path):
     # Create a NER processor for Chinese
-    nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True)
+    nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
+                          download_method=DownloadMethod.REUSE_RESOURCES)
 
     # Dictionary to store named entities and their counts
     entities_dict = {}
@@ -44,9 +46,11 @@ if __name__ == "__main__":
 
     entity2count = ner_from_files(input_dir)
 
+    print("Named Entities and their counts:")
+    for entity, count in entity2count.items():
+        print(f"{entity}: {count} times")
+
     with open('output/entity2count.json', 'w') as writer:
         json.dump(entity2count, writer)
 
-    # print("Named Entities and their counts:")
-    # for entity, count in entity2count.items():
-    #     print(f"{entity}: {count} times")
+
