@@ -13,7 +13,8 @@ def ner_from_files(input_path):
         for file in tqdm(files, desc='Subdir: '):
             # Create a NER processor for Chinese with GPU enabled
             nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
-                                  download_method=DownloadMethod.REUSE_RESOURCES)
+                                  download_method=DownloadMethod.REUSE_RESOURCES,
+                                  logging_level='WARN')
 
             file_path = os.path.join(root, file)
 
