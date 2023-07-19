@@ -13,7 +13,7 @@ def ner_from_files(input_path):
     # Dictionary to store named entities and their counts
     entities_dict = {}
 
-    for root, _, files in tqdm(os.walk(input_path), desc='Total: '):
+    for root, _, files in tqdm(os.walk(input_path), total=len(os.listdir(input_path)), desc='Total: '):
         tqdm.write(f'root {root} {files}')
         for file in tqdm(files, desc='Subdir: '):
 
