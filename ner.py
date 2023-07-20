@@ -99,7 +99,7 @@ def ner_from_files(input_dir: str, output_dir: str):
             if not os.path.exists(final_output_dir):
                 os.makedirs(final_output_dir)
             with open(output_path, 'w') as writer:
-                json.dump(entity_name2entity, writer)
+                json.dump([entity.to_json() for entity in entity_name2entity.values()], writer, ensure_ascii=False)
 
             # Release GPU resources for each document
             torch.cuda.empty_cache()
