@@ -1,58 +1,107 @@
 import json
+import logging
 import os
+from collections import defaultdict
+from dataclasses import dataclass
+
 import stanza
 import torch
 from stanza import DownloadMethod
 from tqdm import tqdm
 
-def ner_from_files(input_path):
-    # Dictionary to store named entities and their counts
-    entities_dict = {}
+logging.basicConfig(filename='ner_processed_file.log',
+                    level=logging.INFO,
+                    format='[%(asctime)s][%(levelname)s] %(message)s')
 
-    for root, _, files in tqdm(os.walk(input_path), total=len(os.listdir(input_path)), desc='Total: '):
+
+class Entity:
+    def __init__(self, name: str):
+        self.name: str = name
+        self.label2count: dict[str, int] = defaultdict(int)
+        self.count: int = 0
+
+
+def ner_from_files(input_dir: str, output_dir: str):
+
+    for root, _, files in tqdm(os.walk(input_dir), total=len(os.listdir(input_dir)), desc='Total: '):
+        logging.info(f'Processing dir {root}.')
+
         for file in tqdm(files, desc='Subdir: '):
-            # Create a NER processor for Chinese with GPU enabled
-            nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
-                                  download_method=DownloadMethod.REUSE_RESOURCES,
-                                  logging_level='WARN')
+            # Dictionary to store named entities and their counts
+            entity_name2entity: dict[str, Entity] = {}
 
             file_path = os.path.join(root, file)
 
-            with open(file_path, 'r', encoding='utf-8') as infile:
-                lines = infile.readlines()
+            # First try to process the file as whole.
+            try:
+                logging.info(f'Processing file {file_path} as whole.')
+                # Create a NER processor for Chinese with GPU enabled
+                nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
+                                      download_method=DownloadMethod.REUSE_RESOURCES,
+                                      logging_level='WARN')
 
-            # Process the text with NER
-            for line in tqdm(lines, desc=f'File {file_path}: '):
-                doc = nlp(line)
+                with open(file_path, 'r', encoding='utf-8') as infile:
+                    text = infile.read()
+
+                # Process the text with NER
+                doc = nlp(text)
 
                 # Collect named entities and update the count in the dictionary
                 for sent in doc.sentences:
                     for entity in sent.ents:
-                        entity_text = entity.text
-                        entity_label = entity.type
+                        # Create entity if it does not exist
+                        if entity.text not in entity_name2entity:
+                            entity_name2entity[entity.text] = Entity(name=entity.text)
+                        # Update the count of entities
+                        entity_name2entity[entity.text].label2count[entity.type] += 1
+                        entity_name2entity[entity.text].count += 1
 
-                        # Update the count of named entities in the dictionary
-                        if entity_label in entities_dict:
-                            entities_dict[entity_label] += 1
-                        else:
-                            entities_dict[entity_label] = 1
+            # If CUDA OOM, process the lines separately.
+            except RuntimeError:
+                logging.warning(f'Failed processing file {file_path} as whole.')
+                logging.info(f'Processing file {file_path} as lines.')
+
+                # Release GPU resources for previous failed process.
+                torch.cuda.empty_cache()
+
+                # Create a NER processor for Chinese with GPU enabled
+                nlp = stanza.Pipeline(lang='zh', processors='tokenize,ner', use_gpu=True,
+                                      download_method=DownloadMethod.REUSE_RESOURCES,
+                                      logging_level='WARN')
+
+                with open(file_path, 'r', encoding='utf-8') as infile:
+                    lines = infile.readlines()
+
+                # Process the text with NER
+                for line in tqdm(lines, desc=f'File {file_path}: '):
+                    doc = nlp(line)
+
+                    # Collect named entities and update the count in the dictionary
+                    for sent in doc.sentences:
+                        for entity in sent.ents:
+                            # Create entity if it does not exist
+                            if entity.text not in entity_name2entity:
+                                entity_name2entity[entity.text] = Entity(name=entity.text)
+                            # Update the count of entities
+                            entity_name2entity[entity.text].label2count[entity.type] += 1
+                            entity_name2entity[entity.text].count += 1
+
+            # Dump the entity dict for current file
+            output_path = os.path.join(file_path.replace(input_dir, output_dir, 1), '.json')
+            final_output_dir = os.path.dirname(os.path.dirname(output_path))
+            if not os.path.exists(final_output_dir):
+                os.makedirs(final_output_dir)
+            with open(output_path, 'w') as writer:
+                json.dump(entity_name2entity, writer)
 
             # Release GPU resources for each document
             torch.cuda.empty_cache()
 
-    return dict(sorted(entities_dict.items(), key=lambda item: item[1], reverse=True))
-
 
 if __name__ == "__main__":
     input_dir = "output/extracted_texts"
+    output_dir = 'output/entities'
 
-    entity2count = ner_from_files(input_dir)
+    ner_from_files(input_dir, output_dir)
 
-    print("Named Entities and their counts:")
-    for entity, count in entity2count.items():
-        print(f"{entity}: {count} times")
-
-    with open('output/entity2count_gpu.json', 'w') as writer:
-        json.dump(entity2count, writer)
-
-
+    # dict(sorted(entity_name2count.items(), key=lambda item: item[1], reverse=True))
