@@ -9,7 +9,7 @@ from stanza import DownloadMethod
 import stanza
 from tqdm import tqdm
 
-logging.basicConfig(filename='logs/ner_processed_file.log',
+logging.basicConfig(filename='logs/ner_mp_processed_file.log',
                     level=logging.INFO,
                     format='[%(asctime)s] [%(levelname)s] %(message)s')
 
@@ -89,7 +89,7 @@ def ner_from_files(args):
 
         # Dump the entity dict for current file
         output_path = f'{file_path.replace(input_dir, output_dir, 1)}.json'
-        final_output_dir = os.path.dirname(os.path.dirname(output_path))
+        final_output_dir = os.path.dirname(output_path)
         if not os.path.exists(final_output_dir):
             os.makedirs(final_output_dir)
         with open(output_path, 'w') as writer:
