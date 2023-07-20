@@ -9,7 +9,7 @@ import torch
 from stanza import DownloadMethod
 from tqdm import tqdm
 
-logging.basicConfig(filename='ner_processed_file.log',
+logging.basicConfig(filename='logs/ner_processed_file.log',
                     level=logging.INFO,
                     format='[%(asctime)s][%(levelname)s] %(message)s')
 
@@ -19,6 +19,13 @@ class Entity:
         self.name: str = name
         self.label2count: dict[str, int] = defaultdict(int)
         self.count: int = 0
+
+    def __dict__(self):
+        return {
+            'name': self.name,
+            'label2count': self.label2count,
+            'count': self.count
+        }
 
 
 def ner_from_files(input_dir: str, output_dir: str):
@@ -87,7 +94,7 @@ def ner_from_files(input_dir: str, output_dir: str):
                             entity_name2entity[entity.text].count += 1
 
             # Dump the entity dict for current file
-            output_path = os.path.join(file_path.replace(input_dir, output_dir, 1).rstrip('/'), '.json')
+            output_path = f'{file_path.replace(input_dir, output_dir, 1)}.json'
             final_output_dir = os.path.dirname(os.path.dirname(output_path))
             if not os.path.exists(final_output_dir):
                 os.makedirs(final_output_dir)
