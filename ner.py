@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 logging.basicConfig(filename='logs/ner_processed_file.log',
                     level=logging.INFO,
-                    format='[%(asctime)s][%(levelname)s] %(message)s')
+                    format='[%(asctime)s] [%(levelname)s] %(message)s')
 
 
 class Entity:
