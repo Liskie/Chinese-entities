@@ -19,22 +19,23 @@ def ner_from_files(input_path):
             file_path = os.path.join(root, file)
 
             with open(file_path, 'r', encoding='utf-8') as infile:
-                text = infile.read()
+                lines = infile.readlines()
 
             # Process the text with NER
-            doc = nlp(text)
+            for line in tqdm(lines, desc=f'File {file_path}: '):
+                doc = nlp(line)
 
-            # Collect named entities and update the count in the dictionary
-            for sent in doc.sentences:
-                for entity in sent.ents:
-                    entity_text = entity.text
-                    entity_label = entity.type
+                # Collect named entities and update the count in the dictionary
+                for sent in doc.sentences:
+                    for entity in sent.ents:
+                        entity_text = entity.text
+                        entity_label = entity.type
 
-                    # Update the count of named entities in the dictionary
-                    if entity_label in entities_dict:
-                        entities_dict[entity_label] += 1
-                    else:
-                        entities_dict[entity_label] = 1
+                        # Update the count of named entities in the dictionary
+                        if entity_label in entities_dict:
+                            entities_dict[entity_label] += 1
+                        else:
+                            entities_dict[entity_label] = 1
 
             # Release GPU resources for each document
             torch.cuda.empty_cache()
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     for entity, count in entity2count.items():
         print(f"{entity}: {count} times")
 
-    with open('output/entity2count.json', 'w') as writer:
+    with open('output/entity2count_gpu.json', 'w') as writer:
         json.dump(entity2count, writer)
 
 
