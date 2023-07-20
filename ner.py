@@ -95,7 +95,7 @@ def ner_from_files(input_dir: str, output_dir: str):
 
             # Dump the entity dict for current file
             output_path = f'{file_path.replace(input_dir, output_dir, 1)}.json'
-            final_output_dir = os.path.dirname(os.path.dirname(output_path))
+            final_output_dir = os.path.dirname(output_path)
             if not os.path.exists(final_output_dir):
                 os.makedirs(final_output_dir)
             with open(output_path, 'w') as writer:
