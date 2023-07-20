@@ -20,7 +20,7 @@ class Entity:
         self.label2count: dict[str, int] = defaultdict(int)
         self.count: int = 0
 
-    def __dict__(self):
+    def to_json(self):
         return {
             'name': self.name,
             'label2count': self.label2count,
