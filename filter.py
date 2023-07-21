@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     logger = logging.getLogger()
 
-    topn = 10000
+    topn = 100000
     input_dir = 'output/merged_entity_dict.json'
     output_path = f'output/top{topn}_entities_zh.jsonl'
 
