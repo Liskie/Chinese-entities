@@ -116,5 +116,3 @@ if __name__ == "__main__":
     output_dir = 'output/entities'
 
     ner_from_files(input_dir, output_dir)
-
-    # dict(sorted(entity_name2count.items(), key=lambda item: item[1], reverse=True))

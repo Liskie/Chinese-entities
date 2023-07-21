@@ -7,7 +7,7 @@ from tqdm import tqdm
 from ner import Entity
 
 logging.basicConfig(filename='logs/merge_dict.log',
-                    level=logging.DEBUG,
+                    level=logging.INFO,
                     format='[%(asctime)s] [%(levelname)s] %(message)s')
 
 
@@ -22,9 +22,21 @@ def merge(input_dir: str, output_path: str) -> None:
 
             with open(file_path, 'r') as reader:
                 entities_data = json.load(reader)
-                for entity_data in entities_data:
-                    logging.debug(entity_data)
-            return
+
+            for entity_data in entities_data:
+                new_entity = Entity.from_json(entity_data)
+                if new_entity.name not in entity_name2entity:
+                    entity_name2entity[new_entity.name] = new_entity
+                else:
+                    existing_entity = entity_name2entity[new_entity.name]
+                    for label, count in new_entity.label2count.items():
+                        existing_entity.label2count[label] += count
+                    existing_entity.count += new_entity.count
+
+    entity_name2entity = dict(sorted(entity_name2entity.items(), key=lambda item: item[1].count, reverse=True))
+
+    with open(output_path, 'w') as writer:
+        json.dump(entity_name2entity, writer)
 
 
 if __name__ == '__main__':
