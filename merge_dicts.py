@@ -6,11 +6,6 @@ from tqdm import tqdm
 
 from ner import Entity
 
-logging.basicConfig(filename='logs/merge_dict.log',
-                    level=logging.INFO,
-                    format='[%(asctime)s] [%(levelname)s] %(message)s')
-
-logger = logging.getLogger()
 
 def merge(input_dir: str, output_path: str) -> None:
     entity_name2entity: dict[str, Entity] = {}
@@ -26,6 +21,7 @@ def merge(input_dir: str, output_path: str) -> None:
 
             for entity_data in entities_data:
                 new_entity = Entity.from_json(entity_data)
+                new_entity.name = new_entity.name.strip('()<>[]{},.:;\'\"+-=!@#$%^&*\n').strip()
                 if new_entity.name not in entity_name2entity:
                     entity_name2entity[new_entity.name] = new_entity
                 else:
@@ -41,6 +37,12 @@ def merge(input_dir: str, output_path: str) -> None:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='logs/merge_dict.log',
+                        level=logging.INFO,
+                        format='[%(asctime)s] [%(levelname)s] %(message)s')
+
+    logger = logging.getLogger()
+
     input_dir = 'output/entities'
     output_path = 'output/merged_entity_dict.json'
 

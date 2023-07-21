@@ -9,10 +9,6 @@ import torch
 from stanza import DownloadMethod
 from tqdm import tqdm
 
-logging.basicConfig(filename='logs/ner_processed_file.log',
-                    level=logging.INFO,
-                    format='[%(asctime)s] [%(levelname)s] %(message)s')
-
 
 class Entity:
     def __init__(self, name: str):
@@ -114,6 +110,10 @@ def ner_from_files(input_dir: str, output_dir: str):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='logs/ner_processed_file.log',
+                        level=logging.INFO,
+                        format='[%(asctime)s] [%(levelname)s] %(message)s')
+
     input_dir = "output/extracted_texts"
     output_dir = 'output/entities'
 

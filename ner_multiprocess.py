@@ -11,10 +11,6 @@ from tqdm import tqdm
 
 from ner import Entity
 
-logging.basicConfig(filename='logs/ner_mp_processed_file.log',
-                    level=logging.INFO,
-                    format='[%(asctime)s] [%(levelname)s] %(message)s')
-
 
 def ner_from_files(args):
     file_paths, gpu_id, output_dir = args
@@ -88,6 +84,10 @@ def ner_from_files(args):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='logs/ner_mp_processed_file.log',
+                        level=logging.INFO,
+                        format='[%(asctime)s] [%(levelname)s] %(message)s')
+
     input_dir = "output/extracted_texts"
     output_dir = 'output/entities'
 
