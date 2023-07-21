@@ -15,11 +15,10 @@ excluded_labels: list[str] = [
     'QUANTITY',
     'TIME',
     'MONEY',
-
 ]
 
 entity_name2references: dict[str, list[str]] = {
-    '堪萨斯州': ['堪萨斯', '堪萨斯州', '美国堪萨斯州', '(堪萨斯', '美国堪萨斯'],
+    '堪萨斯州': ['堪萨斯', '堪萨斯州', '美国堪萨斯州', '美国堪萨斯'],
     '铁达尼号': ['铁达尼号', '铁达尼'],
     '密歇根州': ['密歇根州', '密歇根']
 }
@@ -40,7 +39,13 @@ def filter_entities(input_path: str, output_path: str, topn: int = 10000) -> Non
             continue
 
         entity.label2count = dict(sorted(entity.label2count.items(), key=lambda x: x[1], reverse=True))
-        if list(entity.label2count.keys())[0] in excluded_labels:
+
+        major_label = list(entity.label2count.keys())[0]
+        if major_label in excluded_labels:
+            continue
+
+        # Exclude single-character Chinese last names
+        if len(entity.name) == 1 and major_label in ['PERSON', 'GPE']:
             continue
 
         filtered_entities.append(entity)
