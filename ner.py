@@ -28,7 +28,7 @@ class Entity:
         }
 
     @staticmethod
-    def from_json(self, json_data: dict):
+    def from_json(json_data: dict):
         new_entity = Entity(name=json_data['name'])
         new_entity.label2count = json_data['label2count']
         new_entity.count = json_data['count']
