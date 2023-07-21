@@ -30,7 +30,9 @@ class Entity:
     @staticmethod
     def from_json(json_data: dict):
         new_entity = Entity(name=json_data['name'])
-        new_entity.label2count = json_data['label2count']
+        new_entity.label2count = defaultdict(int)
+        for label, count in json_data['label2count'].items():
+            new_entity.label2count[label] += count
         new_entity.count = json_data['count']
         return new_entity
 
