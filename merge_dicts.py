@@ -10,6 +10,7 @@ logging.basicConfig(filename='logs/merge_dict.log',
                     level=logging.INFO,
                     format='[%(asctime)s] [%(levelname)s] %(message)s')
 
+logger = logging.getLogger()
 
 def merge(input_dir: str, output_path: str) -> None:
     entity_name2entity: dict[str, Entity] = {}
@@ -18,7 +19,7 @@ def merge(input_dir: str, output_path: str) -> None:
 
         for file in tqdm(files, desc='Subdir: '):
             file_path = os.path.join(root, file)
-            logging.info(f'Processing {file_path}.')
+            logger.info(f'Processing {file_path}.')
 
             with open(file_path, 'r') as reader:
                 entities_data = json.load(reader)
@@ -36,7 +37,7 @@ def merge(input_dir: str, output_path: str) -> None:
     entity_name2entity = dict(sorted(entity_name2entity.items(), key=lambda item: item[1].count, reverse=True))
 
     with open(output_path, 'w') as writer:
-        json.dump(entity_name2entity, writer)
+        json.dump([entity.to_json() for entity in entity_name2entity.values()], writer, ensure_ascii=False)
 
 
 if __name__ == '__main__':
