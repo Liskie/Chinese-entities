@@ -27,9 +27,15 @@ class Entity:
             'count': self.count
         }
 
+    @staticmethod
+    def from_json(self, json_data: dict):
+        new_entity = Entity(name=json_data['name'])
+        new_entity.label2count = json_data['label2count']
+        new_entity.count = json_data['count']
+        return new_entity
+
 
 def ner_from_files(input_dir: str, output_dir: str):
-
     for root, _, files in tqdm(os.walk(input_dir), total=len(os.listdir(input_dir)), desc='Total: '):
         logging.info(f'Processing dir {root}.')
 

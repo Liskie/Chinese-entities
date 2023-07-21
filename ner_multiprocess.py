@@ -9,23 +9,11 @@ from stanza import DownloadMethod
 import stanza
 from tqdm import tqdm
 
+from ner import Entity
+
 logging.basicConfig(filename='logs/ner_mp_processed_file.log',
                     level=logging.INFO,
                     format='[%(asctime)s] [%(levelname)s] %(message)s')
-
-
-class Entity:
-    def __init__(self, name: str):
-        self.name: str = name
-        self.label2count: dict[str, int] = defaultdict(int)
-        self.count: int = 0
-
-    def to_json(self):
-        return {
-            'name': self.name,
-            'label2count': self.label2count,
-            'count': self.count
-        }
 
 
 def ner_from_files(args):
